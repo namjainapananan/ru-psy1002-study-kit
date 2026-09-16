@@ -1,5 +1,5 @@
 
-import { quizRegistry, getMarathonQuestions } from 'registeredquestions.js';
+import { quizRegistry, getMarathonQuestions } from './registeredquestions.js';
 
 // State
 let activeQuestions = [];
