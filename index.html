@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PSY1002 STUDY KIT</title>
+  <style>
+    body { font-family: sans-serif; max-width: 550px; margin: 40px auto; padding: 20px; }
+    .card { border: 1px solid #ccc; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .status-bar { display: flex; justify-content: space-between; font-size: 0.9em; color: #666; margin-bottom: 15px; }
+    
+    /* Option Button Styles */
+    .option-btn { 
+      display: block; 
+      width: 100%; 
+      padding: 12px; 
+      margin: 8px 0; 
+      border: 1px solid #ccc; 
+      background: #f8f9fa; 
+      border-radius: 6px; 
+      cursor: pointer; 
+      text-align: left;
+      font-size: 1em;
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+    .option-btn:hover:not(:disabled) { background: #e2e6ea; border-color: #adb5bd; }
+    .option-btn:disabled { cursor: not-allowed; opacity: 0.9; }
+
+    /* Highlights */
+    .option-btn.correct {
+      background-color: #d4edda !important;
+      border-color: #28a745 !important;
+      color: #155724;
+      font-weight: bold;
+    }
+    .option-btn.wrong {
+      background-color: #f8d7da !important;
+      border-color: #dc3545 !important;
+      color: #721c24;
+    }
+
+    .feedback { margin-top: 15px; font-weight: bold; }
+    .score-summary { text-align: center; margin-top: 10px; }
+    .score-badge { font-size: 2.5em; font-weight: bold; color: #007bff; margin: 10px 0; }
+    
+    /* Review Section Styles */
+    .review-container { text-align: left; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; }
+    .review-title { font-weight: bold; font-size: 1.1em; color: #dc3545; margin-bottom: 10px; }
+    .review-item { background: #fff5f5; border-left: 4px solid #dc3545; padding: 10px 15px; margin-bottom: 12px; border-radius: 0 4px 4px 0; }
+    .review-item p { margin: 4px 0; font-size: 0.95em; }
+    .your-ans { color: #721c24; }
+    .correct-ans { color: #155724; font-weight: bold; }
+
+    .hidden { display: none; }
+    
+    .next-btn, .restart-btn {
+      padding: 10px 20px; 
+      color: white; 
+      border: none; 
+      border-radius: 4px; 
+      cursor: pointer; 
+      font-size: 1em;
+      margin-top: 15px;
+    }
+    .next-btn { background-color: #007bff; }
+    .next-btn:hover { background-color: #0056b3; }
+    .restart-btn { background-color: #28a745; }
+    .restart-btn:hover { background-color: #218838; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div id="status-bar" class="status-bar">
+      <span id="progress-text">Question 1 of 3</span>
+      <span id="score-text">Score: 0</span>
+    </div>
+
+    <h3 id="question-text">Loading question...</h3>
+    <div id="options-container"></div>
+    <div id="feedback" class="feedback"></div>
+    
+    <div id="summary-container" class="score-summary hidden">
+      <div id="score-badge" class="score-badge">0%</div>
+      <p id="summary-text"></p>
+
+      <!-- Section displaying missed questions -->
+      <div id="review-container" class="review-container hidden">
+        <div class="review-title">ทบทวน:</div>
+        <div id="review-list"></div>
+      </div>
+
+      <button class="restart-btn" onclick="restartQuiz()">เริ่มใหม่</button>
+    </div>
+
+    <button id="next-btn" class="next-btn hidden">ข้อถัดไป</button>
+  </div>
+
+  <script>
+    const quizQuestions = [
+      /* -- FORMAT --
+      {
+        question: "Which language provides the raw structure for web pages?",
+        options: ["CSS", "HTML", "JavaScript", "Python"],
+        answer: 1 // Index of correct option ("HTML")
+      },
+      */
+      {
+        question: "จิตวิทยามีจุดมุ่งหมายเพื่อ",
+        options: [
+          "หาคำอธิบายพฤติกรรม",
+          "ทำความเข้าใจพฤติกรรม",
+          "ทำนายพฤติกรรม",
+          "ควบคุมพฤติกรรม",
+          "ทุกข้อที่กล่าวมา"
+        ],
+        answer: 4
+      },
+      {
+        question: "จิตวิทยาเริ่มนับเป็นวิทยาศาสตร์ โดยสถานการณ์ใด",
+        options: [
+          "ทำการศึกษาเกี่ยวกับจิตวิญญาณของมนุษย์",
+          "การวิเคราะห์เกี่ยวกับโทรจิต",
+          "ทำการสังเกตทดลองเรื่องจิตสำนึก",
+          "ทำการศึกษาเกี่ยวกับธรรมชาติของมนุษย์",
+          "เมื่อมีการยอมรับว่าจิตของบุคคลเป็นสิ่งที่ทำให้คนแตกต่างจากสิ่งมีชีวิตอื่น"
+        ],
+        answer: 2
+      },
+      {
+        question: "จิตวิทยาแนวอิเคลดทิด (Eclectic psychology) หมายถึงแนวความคิดแบบใด",
+        options: [
+          "พฤติกรรมทางพุทธิปัญญา",
+          "มนุษย์ไม่ใช่เครื่องจักร",
+          "แนวความคิดเน้นเกี่ยวกับเสรีภาพของมนุษย์",
+          "แนวความคิดที่เน้นองค์ประกอบของจิตสำนึก",
+          "การผสมผสานหลายแนวคิดที่เหมาะสม"
+        ],
+        answer: 4
+      },
+      {
+        question: "นักจิตวิทยาแนวคิดใดที่ใช้วิธีการตรวจสอบภายในจิตใจในการศึกษาจิตสำนึก",
+        options: [
+          "กลุ่มโครงสร้างของจิต",
+          "กลุ่มหน้าที่ของจิต",
+          "กลุ่มพฤติกรรมนิยม",
+          "กลุ่มจิตวิทยาเกสตัลท์",
+          "กลุ่มจิตวิเคราะห์"
+        ],
+        answer: 0
+      },
+      {
+        question: "พฤติกรรมและประสบการณ์ทางจิตจะต้องพิจารณาเป็นส่วนรวมแยกออกจากกันไม่ได้",
+        options: [
+          "โครงสร้างของจิต",
+          "หน้าที่ของจิต",
+          "เกสตัลท์",
+          "จิตวิเคราะห์",
+          "พฤติกรรมนิยม"
+        ],
+        answer: 2
+      },
+      {
+        question: "บุคลิกภาพของบุคคลพัฒนามาจากแรงจูงใจไร้สำนึกและความผิดปกติของบุคลิกภาพ เนื่องจากมาจากการเก็บกดในวัยเด็ก",
+        options: [
+          "โครงสร้างของจิต",
+          "หน้าที่ของจิต",
+          "เกสตัลท์",
+          "จิตวิเคราะห์",
+          "พฤติกรรมนิยม"
+        ],
+        answer: 3
+      },
+      {
+        question: "พฤติกรรมคือการทำงานของจิตสำนึกและการปรับตัวของอินทรีย์กับสิ่งแวดล้อม",
+        options: [
+          "โครงสร้างของจิต",
+          "หน้าที่ของจิต",
+          "เกสตัลท์",
+          "จิตวิเคราะห์",
+          "พฤติกรรมนิยม"
+        ],
+        answer: 1
+      },
+      {
+        question: "วิธีการศึกษาทางจิตวิทยาวิธีใดที่ทำให้วิชาจิตวิทยาได้รับการยอมรับว่าเป็นวิทยาศาสตร์แขนงหนึ่ง",
+        options: [
+          "การสังเกต",
+          "การสำรวจ",
+          "การทดลอง",
+          "การทดสอบ",
+          "ทั้งหมดที่กล่าวมา"
+        ],
+        answer: 2
+      },
+      {
+        question: "การศึกษาประวัติรายบุคคล มีความสำคัญอย่างไรทางจิตวิทยา",
+        options: [
+          "ทำให้จิตวิทยาแพร่หลายกว้างไกล",
+          "ช่วยให้เข้าใจสาเหตุของพฤติกรรมดีขึ้น",
+          "เป็นหัวใจของกลุ่มมนุษยนิยม",
+          "เป็นการศึกษาลักษณะพฤติกรรมที่แอบแฝง",
+          "ถูกหมดทุกข้อ"
+        ],
+        answer: 1
+      },
+      {
+        question: "การศึกษาวิจัยแบบทดลองแตกต่างจากการวิจัยแบบสำรวจอย่างไร",
+        options: [
+          "ต้องมีตัวแปรอิสระและตัวแปรตาม",
+          "กลุ่มตัวอย่างมีขนาดเล็กกว่า",
+          "แบบทดลองต้องมีกลุ่มควบคุม",
+          "ถูกเฉพาะข้อ ก. และ ค.",
+          "ทุกข้อที่กล่าวมา"
+        ],
+        answer: 4
+      }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let incorrectAnswers = []; // Array to store missed questions
+
+    const questionEl = document.getElementById('question-text');
+    const optionsEl = document.getElementById('options-container');
+    const feedbackEl = document.getElementById('feedback');
+    const nextBtn = document.getElementById('next-btn');
+    const statusBar = document.getElementById('status-bar');
+    const progressText = document.getElementById('progress-text');
+    const scoreText = document.getElementById('score-text');
+    const summaryContainer = document.getElementById('summary-container');
+    const scoreBadge = document.getElementById('score-badge');
+    const summaryText = document.getElementById('summary-text');
+    const reviewContainer = document.getElementById('review-container');
+    const reviewList = document.getElementById('review-list');
+
+    function loadQuestion() {
+      feedbackEl.textContent = '';
+      nextBtn.classList.add('hidden');
+      optionsEl.innerHTML = '';
+
+      const totalQuestions = quizQuestions.length;
+      progressText.textContent = `ข้อที่ ${currentQuestionIndex + 1} จาก ${totalQuestions}`;
+      scoreText.textContent = `Score: ${score}`;
+
+      const currentQ = quizQuestions[currentQuestionIndex];
+      questionEl.textContent = `${currentQuestionIndex + 1}. ${currentQ.question}`;
+
+      currentQ.options.forEach((optionText, index) => {
+        const button = document.createElement('button');
+        button.className = 'option-btn';
+        button.textContent = optionText;
+        button.onclick = () => selectOption(index);
+        optionsEl.appendChild(button);
+      });
+    }
+
+    function selectOption(selectedIndex) {
+      const currentQ = quizQuestions[currentQuestionIndex];
+      const buttons = optionsEl.querySelectorAll('.option-btn');
+      
+      buttons.forEach(btn => btn.disabled = true);
+
+      if (selectedIndex === currentQ.answer) {
+        score++;
+        buttons[selectedIndex].classList.add('correct');
+        feedbackEl.textContent = "ถูกต้อง! :)";
+        feedbackEl.style.color = "#28a745";
+      } else {
+        buttons[selectedIndex].classList.add('wrong');
+        buttons[currentQ.answer].classList.add('correct');
+        feedbackEl.textContent = `ผิด :c`;
+        feedbackEl.style.color = "#dc3545";
+
+        // Save incorrect attempt details
+        incorrectAnswers.push({
+          question: currentQ.question,
+          userSelected: currentQ.options[selectedIndex],
+          correctAnswer: currentQ.options[currentQ.answer]
+        });
+      }
+
+      scoreText.textContent = `Score: ${score}`;
+      nextBtn.classList.remove('hidden');
+    }
+
+    nextBtn.onclick = () => {
+      currentQuestionIndex++;
+      if (currentQuestionIndex < quizQuestions.length) {
+        loadQuestion();
+      } else {
+        showResults();
+      }
+    };
+
+    function showResults() {
+      const totalQuestions = quizQuestions.length;
+      const percentage = Math.round((score / totalQuestions) * 100);
+
+      questionEl.textContent = "ตอบคำถามครบแล้ว!";
+      optionsEl.innerHTML = '';
+      feedbackEl.textContent = '';
+      statusBar.classList.add('hidden');
+      nextBtn.classList.add('hidden');
+
+      scoreBadge.textContent = `${percentage}%`;
+      summaryText.textContent = `คุณตอบถูก ${score} ข้อ จากคำถามทั้งหมด ${totalQuestions} ข้อ`;
+
+      // Render review of wrong answers if any exist
+      reviewList.innerHTML = '';
+      if (incorrectAnswers.length > 0) {
+        reviewContainer.classList.remove('hidden');
+        incorrectAnswers.forEach(item => {
+          const div = document.createElement('div');
+          div.className = 'review-item';
+          div.innerHTML = `
+            <p><strong>Q:</strong> ${item.question}</p>
+            <p class="your-ans"><strong>ที่คุณเลือก:</strong> ✖ ${item.userSelected}</p>
+            <p class="correct-ans"><strong>ที่ถูกต้อง:</strong> ✔ ${item.correctAnswer}</p>
+          `;
+          reviewList.appendChild(div);
+        });
+      } else {
+        reviewContainer.classList.add('hidden');
+      }
+
+      summaryContainer.classList.remove('hidden');
+    }
+
+    function restartQuiz() {
+      currentQuestionIndex = 0;
+      score = 0;
+      incorrectAnswers = [];
+      summaryContainer.classList.add('hidden');
+      statusBar.classList.remove('hidden');
+      loadQuestion();
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
