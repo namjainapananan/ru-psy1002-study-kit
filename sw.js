@@ -7,8 +7,8 @@ const ASSETS_TO_CACHE = [
   './style.css',
   './script.js',
   './registeredquestions.js',
-  './questions/ch1_pre.js',
-  './questions/ch1_post.js'
+  './questions/psy1002_chapter1.js',
+  './questions/psy1002_chapter2.js'
 ];
 
 // 1. Install & Cache Files
