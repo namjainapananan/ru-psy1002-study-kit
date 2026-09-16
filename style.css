@@ -1,0 +1,6 @@
+body { font-family: sans-serif; margin: 0; padding: 0; }
+.navbar { display: flex; gap: 10px; background: #333; color: white; padding: 1rem; }
+.navbar button { background: #555; color: white; border: none; padding: 8px 16px; cursor: pointer; }
+.page { display: none; padding: 20px; }
+.page.active { display: block; }
+.option-btn { display: block; margin: 8px 0; padding: 8px 12px; cursor: pointer; }
