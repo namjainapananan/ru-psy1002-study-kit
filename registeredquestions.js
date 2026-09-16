@@ -10,5 +10,5 @@ export const quizRegistry = [
 
 // Helper to construct a single array containing ALL questions for Marathon Mode
 export function getMarathonQuestions() {
-  return quizRegistry.flatMap(quiz => quiz.questions);
-}
+  return quizRegistry.flatMap(quiz => quiz.questions)
+};
