@@ -8,7 +8,17 @@ const ASSETS_TO_CACHE = [
   './script.js',
   './registeredquestions.js',
   './questions/psy1002_chapter1.js',
-  './questions/psy1002_chapter2.js'
+  './questions/psy1002_chapter2.js',
+  './questions/psy1002_chapter3.js',
+  './questions/psy1002_chapter4.js',
+  './questions/psy1002_chapter5.js',
+  './questions/psy1002_chapter6.js',
+  './questions/psy1002_chapter7.js',
+  './questions/psy1002_chapter8.js',
+  './questions/psy1002_chapter9.js',
+  './questions/psy1002_chapter10.js',
+  './questions/psy1002_chapter11.js',
+  './questions/psy1002_chapter12.js'
 ];
 
 // 1. Install & Cache Files
