@@ -1,5 +1,5 @@
-export const psychology_quiz_chapter_6 = {
-  id: "psychology_quiz_chapter_6",
+export const psy1002_chapter6 = {
+  id: "psy1002_chapter6",
   title: "แบบฝึกหัดท้ายบท 6",
   questions: [
     {
