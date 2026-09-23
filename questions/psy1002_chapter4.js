@@ -1,6 +1,6 @@
 export const psy1002_chapter4 = {
   id: "psy1002_chapter4",
-  title: "แบบฝึกหัดท้ายบท 4",
+  title: "4-P การรับสัมผัสและการรับรู้",
   questions: [
     {
       question: "ข้อใดถูกต้องในเรื่องการสัมผัส",

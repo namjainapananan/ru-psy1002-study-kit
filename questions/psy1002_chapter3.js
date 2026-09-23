@@ -1,6 +1,6 @@
 export const psy1002_chapter3 = {
   id: "psy1002_chapter3",
-  title: "แบบฝึกหัดท้ายบท 3",
+  title: "3-P พัฒนาการมนุษย์",
   questions: [
     {
       question: "ข้อใดกล่าวถูกต้องเกี่ยวกับพัฒนาการมนุษย์",

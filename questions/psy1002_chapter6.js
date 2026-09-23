@@ -1,6 +1,6 @@
 export const psy1002_chapter6 = {
   id: "psy1002_chapter6",
-  title: "แบบฝึกหัดท้ายบท 6",
+  title: "6-P การรู้คิดและสติปัญญา",
   questions: [
     {
       question: "ข้อใดไม่ถูกต้องเกี่ยวกับการรู้คิด",

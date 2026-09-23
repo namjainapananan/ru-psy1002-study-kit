@@ -1,6 +1,6 @@
 export const psy1002_chapter1 = {
   id: "psy1002_chapter1",
-  title: "แบบฝึกหัดท้ายบท 1",
+  title: "1-P ความรู้เบื้องต้นเกี่ยวกับจิตวิทยา",
   questions: [
     {
       question: "จิตวิทยาเป้าหมายเพื่อ",

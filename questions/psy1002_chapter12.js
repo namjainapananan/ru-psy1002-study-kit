@@ -1,6 +1,6 @@
 export const psy1002_chapter12 = {
   id: "psy1002_chapter12",
-  title: "แบบฝึกหัดท้ายบท 12",
+  title: "12-P จิตวิทยาประยุกต์",
   questions: [
     {
       question: "ข้อใดคือจิตวิทยาบริสุทธิ์",

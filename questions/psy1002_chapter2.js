@@ -1,6 +1,6 @@
 export const psy1002_chapter2 = {
   id: "psy1002_chapter2",
-  title: "แบบฝึกหัดท้ายบท 2",
+  title: "2-P ร่างกายและจิตใจ",
   questions: [
     {
       question: "1. แขนของเซลล์ประสาทที่ทำหน้าที่รับสัญญาณเข้าเซลล์ ชื่อ อะไร",
