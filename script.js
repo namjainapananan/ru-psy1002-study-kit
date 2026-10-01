@@ -1,11 +1,9 @@
-
 import { quizRegistry, getMarathonQuestions } from './registeredquestions.js';
 
 // State
 let activeQuestions = [];
 let currentQuestionIndex = 0;
-let score = 0;
-let incorrectAnswers = [];
+let userAnswers = []; // Tracks selected index for each question: [index or null]
 
 // DOM Elements
 const selectionScreen = document.getElementById('selection-screen');
@@ -17,6 +15,7 @@ const quizTitleText = document.getElementById('quiz-title-text');
 const questionEl = document.getElementById('question-text');
 const optionsEl = document.getElementById('options-container');
 const feedbackEl = document.getElementById('feedback');
+const prevBtn = document.getElementById('prev-btn');
 const nextBtn = document.getElementById('next-btn');
 const statusBar = document.getElementById('status-bar');
 const progressText = document.getElementById('progress-text');
@@ -51,8 +50,7 @@ function startQuiz(questions, title) {
   activeQuestions = questions;
   quizTitleText.textContent = title;
   currentQuestionIndex = 0;
-  score = 0;
-  incorrectAnswers = [];
+  userAnswers = new Array(questions.length).fill(null);
 
   selectionScreen.classList.add('hidden');
   quizScreen.classList.remove('hidden');
@@ -62,53 +60,82 @@ function startQuiz(questions, title) {
   loadQuestion();
 }
 
+function calculateScore() {
+  return userAnswers.reduce((score, selectedIdx, qIdx) => {
+    if (selectedIdx !== null && selectedIdx === activeQuestions[qIdx].answer) {
+      return score + 1;
+    }
+    return score;
+  }, 0);
+}
+
 function loadQuestion() {
   feedbackEl.textContent = '';
-  nextBtn.classList.add('hidden');
   optionsEl.innerHTML = '';
 
   const total = activeQuestions.length;
   progressText.textContent = `ข้อที่ ${currentQuestionIndex + 1}/${total}`;
-  scoreText.textContent = `Score: ${score}`;
+  scoreText.textContent = `Score: ${calculateScore()}`;
+
+  // Toggle Previous Button
+  if (currentQuestionIndex > 0) {
+    prevBtn.classList.remove('hidden');
+  } else {
+    prevBtn.classList.add('hidden');
+  }
 
   const currentQ = activeQuestions[currentQuestionIndex];
   questionEl.textContent = `${currentQuestionIndex + 1}. ${currentQ.question}`;
+
+  const hasAnswered = userAnswers[currentQuestionIndex] !== null;
 
   currentQ.options.forEach((optionText, index) => {
     const button = document.createElement('button');
     button.className = 'option-btn';
     button.textContent = optionText;
-    button.addEventListener('click', () => selectOption(index));
+
+    if (hasAnswered) {
+      button.disabled = true;
+      const selectedIndex = userAnswers[currentQuestionIndex];
+      if (index === currentQ.answer) {
+        button.classList.add('correct');
+      }
+      if (index === selectedIndex && selectedIndex !== currentQ.answer) {
+        button.classList.add('wrong');
+      }
+    } else {
+      button.addEventListener('click', () => selectOption(index));
+    }
+
     optionsEl.appendChild(button);
   });
+
+  if (hasAnswered) {
+    const selectedIndex = userAnswers[currentQuestionIndex];
+    if (selectedIndex === currentQ.answer) {
+      feedbackEl.textContent = "ถูกต้อง! :)";
+      feedbackEl.style.color = "#28a745";
+    } else {
+      feedbackEl.textContent = "ผิด :c";
+      feedbackEl.style.color = "#dc3545";
+    }
+    nextBtn.classList.remove('hidden');
+  } else {
+    nextBtn.classList.add('hidden');
+  }
 }
 
 function selectOption(selectedIndex) {
-  const currentQ = activeQuestions[currentQuestionIndex];
-  const buttons = optionsEl.querySelectorAll('.option-btn');
-  buttons.forEach(btn => btn.disabled = true);
-
-  if (selectedIndex === currentQ.answer) {
-    score++;
-    buttons[selectedIndex].classList.add('correct');
-    feedbackEl.textContent = "ถูกต้อง! :)";
-    feedbackEl.style.color = "#28a745";
-  } else {
-    buttons[selectedIndex].classList.add('wrong');
-    buttons[currentQ.answer].classList.add('correct');
-    feedbackEl.textContent = `ผิด :c`;
-    feedbackEl.style.color = "#dc3545";
-
-    incorrectAnswers.push({
-      question: currentQ.question,
-      userSelected: currentQ.options[selectedIndex],
-      correctAnswer: currentQ.options[currentQ.answer]
-    });
-  }
-
-  scoreText.textContent = `Score: ${score}`;
-  nextBtn.classList.remove('hidden');
+  userAnswers[currentQuestionIndex] = selectedIndex;
+  loadQuestion();
 }
+
+prevBtn.addEventListener('click', () => {
+  if (currentQuestionIndex > 0) {
+    currentQuestionIndex--;
+    loadQuestion();
+  }
+});
 
 nextBtn.addEventListener('click', () => {
   currentQuestionIndex++;
@@ -121,18 +148,34 @@ nextBtn.addEventListener('click', () => {
 
 function showResults() {
   const total = activeQuestions.length;
+  const score = calculateScore();
   const percentage = Math.round((score / total) * 100);
 
   questionEl.textContent = "ตอบคำถามครบแล้ว!";
   optionsEl.innerHTML = '';
   feedbackEl.textContent = '';
   statusBar.classList.add('hidden');
+  prevBtn.classList.add('hidden');
   nextBtn.classList.add('hidden');
 
   scoreBadge.textContent = `${percentage}%`;
   summaryText.textContent = `คุณตอบถูก ${score} ข้อ จากคำถามทั้งหมด ${total} ข้อ`;
 
   reviewList.innerHTML = '';
+  
+  // Filter incorrect responses for review summary
+  const incorrectAnswers = [];
+  activeQuestions.forEach((q, idx) => {
+    const selected = userAnswers[idx];
+    if (selected !== q.answer) {
+      incorrectAnswers.push({
+        question: q.question,
+        userSelected: selected !== null ? q.options[selected] : 'ไม่ได้ตอบ',
+        correctAnswer: q.options[q.answer]
+      });
+    }
+  });
+
   if (incorrectAnswers.length > 0) {
     reviewContainer.classList.remove('hidden');
     incorrectAnswers.forEach(item => {
